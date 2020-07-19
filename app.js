@@ -3,6 +3,7 @@ const express = require("express");
 const bodyParser = require("body-parser");
 const ejs = require("ejs");
 const mongoose = require("mongoose");
+const encrypt = require("mongoose-encryption");
 
 const app = express();
 
@@ -14,11 +15,19 @@ app.use(bodyParser.urlencoded({ extended: true }));
 mongoose.connect("mongodb://localhost:27017/userDB", { useNewUrlParser: true, useUnifiedTopology: true });
 
 //setup new user database
-//js object
-const userSchema = {
+//javascript objesinden mongoose Schema classindan olusturulmus bir objeye cevirdm.
+const userSchema = new mongoose.Schema({
     email: String,
     password: String
-};
+});
+
+/** Level 2 Authentication */
+const secret = "Thisisourlittlesecret.";
+// Biz sadece password alanini encrypt etmek istiyoruz. email alanini encrypt etmeye gerek yok.
+// Belirli alanlari encrypt etmek icin "encryptedFields" kullanilir.
+// Dokumanlar "save" edilirken encrypt edilir, "find" sirasinda decrypt edilir.
+// database'de password uzun bir binary olarak kaydedilir.  
+userSchema.plugin(encrypt, {secret: secret, encryptedFields: ['password']});
 
 const User = new mongoose.model("User", userSchema);
 
