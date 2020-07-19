@@ -1,11 +1,15 @@
 //jshint esversion:6
+require('dotenv').config();
 const express = require("express");
 const bodyParser = require("body-parser");
 const ejs = require("ejs");
 const mongoose = require("mongoose");
+// package for password encryption
 const encrypt = require("mongoose-encryption");
 
 const app = express();
+
+console.log(process.env.API_KEY);
 
 app.use(express.static("public"));
 app.set('view engine', 'ejs');
@@ -22,12 +26,12 @@ const userSchema = new mongoose.Schema({
 });
 
 /** Level 2 Authentication */
-const secret = "Thisisourlittlesecret.";
+
 // Biz sadece password alanini encrypt etmek istiyoruz. email alanini encrypt etmeye gerek yok.
 // Belirli alanlari encrypt etmek icin "encryptedFields" kullanilir.
 // Dokumanlar "save" edilirken encrypt edilir, "find" sirasinda decrypt edilir.
 // database'de password uzun bir binary olarak kaydedilir.  
-userSchema.plugin(encrypt, {secret: secret, encryptedFields: ['password']});
+userSchema.plugin(encrypt, {secret: process.env.SECRET, encryptedFields: ['password']});
 
 const User = new mongoose.model("User", userSchema);
 
